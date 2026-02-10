@@ -137,9 +137,9 @@ export class UnderfloorService {
      * Fórmula: L_acometida = distanciaAlColector × 2 (ida + vuelta)
      * 
      * Esta distancia es crítica para:
-     * - Determinar el diámetro del colector
-     * - Calcular la capacidad de caudal requerida
-     * - Evaluar la pérdida de carga en alimentación
+     * - Junto con la demanda de los circuitos, determina el diámetro de la tubería de alimentación
+     * - Calcular la pérdida de carga en el tramo de alimentación
+     * - Seleccionar la bomba de circulación correcta
      */
     private calculateAcometidaLength(distanciaAlColector: number): number {
         return distanciaAlColector * 2;

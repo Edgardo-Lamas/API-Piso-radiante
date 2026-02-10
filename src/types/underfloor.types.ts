@@ -32,7 +32,8 @@ export interface UnderfloorCalculationInput {
 
     /** Distancia de IDA entre la caldera y la ubicación del colector en metros.
      *  Se calcula como ida + vuelta (×2) para determinar la longitud total de acometida.
-     *  Afecta el diámetro del colector y su capacidad de caudal. */
+     *  Junto con la demanda de los circuitos, determina el diámetro de la tubería de alimentación
+     *  y la pérdida de carga en el sistema. */
     distanciaAlColector: number;
 
     /** Distancia entre Caldera y Colector para alimentación (opcional, diseño avanzado) */
