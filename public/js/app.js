@@ -76,7 +76,8 @@ cancelCalibBtn.addEventListener('click', handleCancelCalibration);
 startRoomBtn.addEventListener('click', handleStartRoomDrawing);
 clearRoomsBtn.addEventListener('click', () => {
     designState.rooms = [];
-    showError("Ambientes eliminados");
+    updateRoomsList();
+    showError("✓ Ambientes eliminados");
 });
 
 // Listeners Modal
@@ -644,6 +645,11 @@ function handleStartCalibration() {
     designState.calibration.points = [];
     calibrationTools.classList.remove('hidden');
     startCalibBtn.classList.add('hidden');
+    
+    // Mostrar otros botones al calibrar
+    document.getElementById('start-room-btn').classList.remove('hidden');
+    document.getElementById('start-route-btn').classList.remove('hidden');
+    document.getElementById('clear-rooms-btn').classList.remove('hidden');
 }
 
 function handleApplyCalibration() {
@@ -763,7 +769,10 @@ function onRoomRectFinished(rect) {
     designState.isDrawingRoom = false;
     startRoomBtn.classList.remove('bg-blue-600', 'text-white');
     document.getElementById('pipe-layout-canvas').style.cursor = 'default';
-    interactionHint.textContent = 'Ambiente guardado. Podés agregar más o calcular.';
+    interactionHint.textContent = `✓ Ambiente "${designState.activeRoomName}" guardado (Área: ${formatNumber(room.area, 1)} m²). Podés agregar más.`;
+
+    // Mostrar confirmación visual
+    showError(`✓ Ambiente agregado: "${room.name}" (${formatNumber(room.area, 1)} m²)`);
 
     // Recalcular y mostrar advertencias de circuitos
     updateMultiRoomResults();
@@ -791,6 +800,9 @@ function updateMultiRoomResults() {
         }
     });
 
+    // Actualizar lista visual de ambientes
+    updateRoomsList();
+
     if (warnings.length > 0) {
         showError(warnings.join("<br>"));
     }
@@ -798,6 +810,28 @@ function updateMultiRoomResults() {
     // Actualizar campos del formulario para el cálculo final
     document.getElementById('area').value = formatNumber(totalArea, 1);
     document.getElementById('distancia').value = formatNumber(calculateWaypointDistance(), 1);
+}
+
+function updateRoomsList() {
+    const roomsListContainer = document.getElementById('rooms-list');
+    const roomsItemsContainer = document.getElementById('rooms-items');
+    
+    if (designState.rooms.length === 0) {
+        roomsListContainer.classList.add('hidden');
+        return;
+    }
+
+    roomsListContainer.classList.remove('hidden');
+    roomsItemsContainer.innerHTML = designState.rooms.map((room, idx) => `
+        <div class="flex items-center justify-between p-2 bg-slate-800 rounded text-xs">
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded" style="background-color: ${room.color}"></div>
+                <span class="text-gray-300">${room.name}</span>
+            </div>
+            <span class="text-gray-500">${formatNumber(room.area, 1)} m²</span>
+        </div>
+    `).join('');
+}
 }
 
 function calculateWaypointDistanceToRoom(room) {
