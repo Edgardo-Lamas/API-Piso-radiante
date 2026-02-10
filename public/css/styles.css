@@ -1,0 +1,425 @@
+/* ========================================
+   API Piso Radiante - Custom Styles
+   ======================================== */
+
+:root {
+    /* Colores del tema */
+    --color-critical: #ef4444;
+    --color-warning: #f59e0b;
+    --color-info: #3b82f6;
+    --color-success: #10b981;
+
+    /* Gradientes */
+    --gradient-critical: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+    --gradient-warning: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+    --gradient-info: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+}
+
+/* ========================================
+   Animaciones
+   ======================================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.6s ease-out;
+}
+
+/* ========================================
+   Tarjetas de Datos
+   ======================================== */
+
+.data-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #334155;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.data-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    border-color: #3b82f6;
+}
+
+.data-card-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: inline-block;
+}
+
+.data-card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+
+.data-card-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.data-card-subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #334155;
+}
+
+/* ========================================
+   Sistema de Alertas Profesionales
+   ======================================== */
+
+.advisory-alert {
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.6s ease-out;
+}
+
+.advisory-alert-critical {
+    background: var(--gradient-critical);
+    border-left: 6px solid var(--color-critical);
+    border: 1px solid #991b1b;
+}
+
+.advisory-alert-warning {
+    background: var(--gradient-warning);
+    border-left: 6px solid var(--color-warning);
+    border: 1px solid #92400e;
+}
+
+.advisory-alert-info {
+    background: var(--gradient-info);
+    border-left: 6px solid var(--color-info);
+    border: 1px solid #1e40af;
+}
+
+.advisory-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.advisory-icon {
+    font-size: 1.75rem;
+    margin-right: 0.75rem;
+}
+
+.advisory-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.advisory-content {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* Estilos para secciones dentro del mensaje */
+.advisory-content strong {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* ========================================
+   Loading States
+   ======================================== */
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ========================================
+   Form Enhancements
+   ======================================== */
+
+input:focus,
+select:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+}
+
+/* ========================================
+   Responsive Utilities
+   ======================================== */
+
+@media (max-width: 767px) {
+
+    /* Mobile Gate específico */
+    #mobile-gate {
+        background-attachment: fixed;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+
+    /* Tablet: Aumentar tamaños para touch */
+    .data-card {
+        padding: 2rem;
+    }
+
+    .data-card-value {
+        font-size: 3rem;
+    }
+
+    input,
+    select,
+    button {
+        font-size: 1rem;
+        padding: 1rem 1.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+
+    /* Desktop: Layout side-by-side */
+    .data-card-value {
+        font-size: 2.25rem;
+    }
+}
+
+/* ========================================
+   Scrollbar Personalizado
+   ======================================== */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* ========================================
+   Utilidades Adicionales
+   ======================================== */
+
+.text-gradient {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.glass-effect {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.shadow-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+
+@media print {
+
+    #mobile-gate,
+    header,
+    footer,
+    #calculation-form {
+        display: none !important;
+    }
+
+    #results-container {
+        display: block !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+
+    .data-card,
+    .advisory-alert {
+        border: 2px solid #000;
+        page-break-inside: avoid;
+    }
+}
+
+/* ========================================
+   Canvas Styles
+   ======================================== */
+
+#pipe-layout-canvas {
+    background: #0f172a;
+    cursor: crosshair;
+    image-rendering: crisp-edges;
+}
+
+/* Circuit Legend */
+.circuit-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #1e293b;
+    border-radius: 0.5rem;
+    border: 1px solid #334155;
+    transition: all 0.3s ease;
+}
+
+.circuit-legend-item:hover {
+    background: #334155;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.circuit-color-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Canvas Info Grid */
+#canvas-container .grid>div {
+    transition: all 0.3s ease;
+}
+
+#canvas-container .grid>div:hover {
+    background: #475569;
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   Budget Table Styles
+   ======================================== */
+
+#budget-table-body tr {
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #1e293b;
+}
+
+#budget-table-body tr:hover {
+    background-color: rgba(30, 41, 59, 0.5);
+}
+
+#budget-table-body td {
+    vertical-align: middle;
+}
+
+.budget-item-name {
+    font-weight: 500;
+    color: #f8fafc;
+}
+
+.budget-item-description {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    display: block;
+}
+
+#budget-total {
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+@media print {
+    #budget-container {
+        display: block !important;
+        background: white !important;
+        color: black !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    #budget-table-body tr {
+        border-bottom: 1px solid #ccc !important;
+    }
+
+    #budget-total {
+        color: black !important;
+    }
+}

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Profesional de Piso Radiante | Herramienta de Ingeniería</title>
+    <meta name="description" content="Herramienta profesional para cálculo técnico de instalaciones de piso radiante">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-mono {
+            font-family: 'Roboto Mono', monospace;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-gray-100 min-h-screen">
+
+    <!-- MOBILE GATE: Solo visible en pantallas < 768px -->
+    <div id="mobile-gate"
+        class="md:hidden min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div class="text-center max-w-md">
+            <div class="mb-6">
+                <i class="fas fa-tablet-alt text-6xl text-blue-400 mb-4"></i>
+            </div>
+            <h1 class="text-2xl font-bold mb-4 text-white">Herramienta de Ingeniería</h1>
+            <div class="bg-slate-800 border-l-4 border-yellow-500 p-6 rounded-lg shadow-xl">
+                <p class="text-lg mb-4 leading-relaxed">
+                    Esta herramienta de ingeniería requiere una pantalla de mayor resolución
+                    <span class="font-semibold text-blue-400">(Tablet o Desktop)</span>
+                    para garantizar la precisión en el diseño y visualización de planos.
+                </p>
+                <div class="mt-6 text-sm text-gray-400">
+                    <p class="mb-2"><i class="fas fa-check-circle text-green-400 mr-2"></i>Tablet (≥768px)</p>
+                    <p class="mb-2"><i class="fas fa-check-circle text-green-400 mr-2"></i>Notebook</p>
+                    <p><i class="fas fa-check-circle text-green-400 mr-2"></i>Desktop</p>
+                </div>
+            </div>
+            <p class="mt-6 text-sm text-gray-500">
+                Resolución actual: <span id="current-width" class="font-mono text-yellow-400"></span>px
+            </p>
+        </div>
+    </div>
+
+    <!-- MAIN APPLICATION: Oculto en móviles -->
+    <div id="main-app" class="hidden md:block">
+
+        <!-- Header -->
+        <header class="bg-slate-800 border-b border-slate-700 shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-fire text-3xl text-orange-500"></i>
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Calculadora de Piso Radiante</h1>
+                            <p class="text-sm text-gray-400">Herramienta Profesional de Ingeniería Térmica</p>
+                        </div>
+                    </div>
+                    <div class="hidden lg:flex items-center space-x-4">
+                        <span class="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">v1.0</span>
+                        <span class="text-sm text-gray-400">API Status: <span class="text-green-400">●</span>
+                            Online</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-6 py-8 max-w-7xl">
+
+            <!-- Layout: Side-by-side en desktop (>1024px), Vertical en tablet (768-1024px) -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+                <!-- LEFT PANEL: Formulario de Entrada (40% en desktop) -->
+                <div class="lg:col-span-2">
+                    <div class="bg-slate-800 rounded-lg shadow-xl border border-slate-700 p-6 sticky top-8">
+                        <h2 class="text-xl font-semibold mb-6 flex items-center text-white">
+                            <i class="fas fa-edit text-blue-400 mr-3"></i>
+                            Datos de Entrada
+                        </h2>
+
+                        <form id="calculation-form" class="space-y-5">
+
+                            <!-- Área -->
+                            <div>
+                                <label for="area" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Área a Calefaccionar (m²)
+                                </label>
+                                <input type="number" id="area" name="area" min="1" max="1000" step="0.1"
+                                    placeholder="Ej: 50" required
+                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                <p class="mt-1 text-xs text-gray-500">Rango: 1 - 1000 m²</p>
+                            </div>
+
+                            <!-- Carga Térmica -->
+                            <div>
+                                <label for="cargaTermica" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Carga Térmica Requerida (W/m²)
+                                </label>
+                                <input type="number" id="cargaTermica" name="cargaTermicaRequerida" min="10" max="150"
+                                    step="1" placeholder="Ej: 70" required
+                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                <p class="mt-1 text-xs text-gray-500">Rango: 10 - 150 W/m²</p>
+                            </div>
+
+                            <!-- Tipo de Suelo -->
+                            <div>
+                                <label for="tipoSuelo" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Tipo de Suelo / Acabado
+                                </label>
+                                <select id="tipoSuelo" name="tipoDeSuelo" required
+                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                    <option value="">Seleccione un tipo...</option>
+                                    <option value="PETREO">Pétreo (Cerámica, Porcelanato, Piedra)</option>
+                                    <option value="MADERA_MACIZA">Madera Maciza</option>
+                                    <option value="MADERA_FLOTANTE">Madera Flotante</option>
+                                    <option value="MOQUETA">Moqueta / Alfombra</option>
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500">Afecta la potencia máxima de emisión</p>
+                            </div>
+
+                            <!-- Distancia al Colector -->
+                            <div>
+                                <label for="distancia" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Distancia al Colector (m)
+                                </label>
+                                <input type="number" id="distancia" name="distanciaAlColector" min="0" max="50"
+                                    step="0.5" placeholder="Ej: 8" required
+                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                <p class="mt-1 text-xs text-gray-500">Distancia lineal desde colector a puerta</p>
+                            </div>
+
+                            <!-- Botón de Acción -->
+                            <!-- Herramientas de Diseño Avanzado -->
+                            <div class="mt-8 pt-6 border-t border-slate-700">
+                                <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                                    Herramientas de Diseño</h4>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div class="flex flex-col space-y-2">
+                                        <label class="text-xs text-gray-500">Subir Plano de Obra (Imagen)</label>
+                                        <div class="flex items-center space-x-2">
+                                            <input type="file" id="plan-upload" class="hidden" accept="image/*">
+                                            <label for="plan-upload"
+                                                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white text-sm py-2 px-4 rounded cursor-pointer transition text-center flex items-center justify-center">
+                                                <i class="fas fa-upload mr-2"></i>
+                                                Seleccionar Archivo
+                                            </label>
+                                            <button id="remove-plan-btn"
+                                                class="bg-red-900/50 hover:bg-red-800 text-red-300 p-2 rounded transition hidden">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div id="calibration-tools"
+                                        class="hidden space-y-3 bg-slate-900/50 p-4 rounded-lg border border-blue-500/30">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs font-bold text-blue-400">MODO CALIBRACIÓN</span>
+                                            <button id="cancel-calib-btn"
+                                                class="text-xs text-gray-500 hover:text-white">Cancelar</button>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400">Traza una línea sobre una medida conocida
+                                            en el plano.</p>
+                                        <div class="flex space-x-2">
+                                            <input type="number" id="real-dist-input" placeholder="Metros reales"
+                                                step="0.1"
+                                                class="flex-1 bg-slate-800 border-slate-700 rounded text-sm px-3 py-1 text-white">
+                                            <button id="apply-calib-btn"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded">Aplicar</button>
+                                        </div>
+                                    </div>
+
+                                    <button id="start-calib-btn"
+                                        class="bg-slate-700 hover:bg-slate-600 text-white text-sm py-2 px-4 rounded transition flex items-center justify-center hidden">
+                                        <i class="fas fa-ruler-combined mr-2"></i>
+                                        Calibrar Escala
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="submit-btn"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                <i class="fas fa-calculator"></i>
+                                <span>Generar Cálculo Técnico</span>
+                            </button>
+
+                            <!-- Loading State -->
+                            <div id="loading" class="hidden text-center py-4">
+                                <i class="fas fa-spinner fa-spin text-3xl text-blue-400"></i>
+                                <p class="mt-2 text-sm text-gray-400">Procesando cálculo...</p>
+                            </div>
+
+                            <!-- Error Message -->
+                            <div id="error-message" class="hidden bg-red-900/50 border border-red-600 rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-exclamation-triangle text-red-400 mr-3 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-red-300 mb-1">Error de Validación</h4>
+                                        <p id="error-text" class="text-sm text-red-200"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL: Resultados (60% en desktop) -->
+                <div class="lg:col-span-3">
+
+                    <!-- Estado Inicial -->
+                    <div id="initial-state"
+                        class="bg-slate-800 rounded-lg shadow-xl border border-slate-700 p-12 text-center">
+                        <i class="fas fa-chart-line text-6xl text-gray-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-400 mb-2">Resultados del Cálculo</h3>
+                        <p class="text-gray-500">Complete el formulario y presione "Generar Cálculo Técnico" para ver
+                            los resultados</p>
+                    </div>
+
+                    <!-- Resultados -->
+                    <div id="results-container" class="hidden space-y-6">
+
+                        <!-- Tarjetas de Datos -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="data-cards">
+                            <!-- Las tarjetas se generarán dinámicamente con JavaScript -->
+                        </div>
+
+                        <!-- Asesoramiento Profesional -->
+                        <div id="advisory-container" class="hidden">
+                            <!-- Se generará dinámicamente -->
+                        </div>
+
+                        <!-- Nota de Diseño -->
+                        <div class="bg-slate-800 border-l-4 border-blue-500 rounded-lg p-5 shadow-lg">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-400 mr-3 mt-1"></i>
+                                <div>
+                                    <h4 class="font-semibold text-blue-300 mb-2">Nota Profesional</h4>
+                                    <p class="text-sm text-gray-300 leading-relaxed" id="design-note">
+                                        Cálculo estimado para pre-dimensionamiento. Se requiere plano 1:100 con cotas
+                                        para balance térmico definitivo.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Canvas: Esquema Técnico de Trazado -->
+                        <div id="canvas-container"
+                            class="hidden bg-slate-800 rounded-lg shadow-xl border border-slate-700 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold flex items-center text-white">
+                                    <i class="fas fa-drafting-compass text-blue-400 mr-3"></i>
+                                    Esquema Técnico de Trazado
+                                </h3>
+                                <button id="gen-budget-btn"
+                                    class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded transition flex items-center">
+                                    <i class="fas fa-file-invoice-dollar mr-2"></i>
+                                    Generar Presupuesto
+                                </button>
+                            </div>
+
+                            <div class="bg-slate-900 rounded-lg p-4 border border-slate-700">
+                                <canvas id="pipe-layout-canvas" width="800" height="600"
+                                    class="w-full h-auto border border-slate-600 rounded">
+                                </canvas>
+                            </div>
+
+                            <!-- Canvas Toolbar -->
+                            <div
+                                class="mt-4 flex flex-wrap items-center gap-3 bg-slate-900/30 p-2 rounded border border-slate-700">
+                                <button id="clear-all-btn"
+                                    class="bg-slate-700 hover:bg-slate-600 text-gray-300 text-xs py-1.5 px-3 rounded transition flex items-center">
+                                    <i class="fas fa-broom mr-2"></i> Limpiar Todo
+                                </button>
+                                <button id="delete-waypoints-btn"
+                                    class="bg-slate-700 hover:bg-slate-600 text-gray-300 text-xs py-1.5 px-3 rounded transition flex items-center">
+                                    <i class="fas fa-eraser mr-2"></i> Borrar Ruta
+                                </button>
+                                <div class="h-4 w-px bg-slate-700 mx-1"></div>
+                                <button id="start-room-btn"
+                                    class="bg-blue-900/40 hover:bg-blue-800 text-blue-300 text-xs py-1.5 px-3 rounded border border-blue-500/30 transition flex items-center">
+                                    <i class="fas fa-vector-square mr-2"></i> Definir Ambiente
+                                </button>
+                                <button id="clear-rooms-btn"
+                                    class="bg-slate-700 hover:bg-slate-600 text-gray-300 text-xs py-1.5 px-3 rounded transition flex items-center">
+                                    <i class="fas fa-trash-alt mr-2"></i> Limpiar Ambientes
+                                </button>
+                                <div class="h-4 w-px bg-slate-700 mx-1"></div>
+                                <span class="text-[10px] text-gray-500 italic">Waypoints: <span id="waypoint-count"
+                                        class="font-mono">0</span></span>
+                                <div class="flex-1"></div>
+                                <p id="interaction-hint" class="text-[10px] text-blue-400 font-medium animate-pulse">
+                                    <!-- Dinámico -->
+                                </p>
+                            </div>
+
+                            <!-- Leyenda de Circuitos -->
+                            <div id="circuit-legend" class="mt-4 flex flex-wrap gap-3">
+                                <!-- Se generará dinámicamente -->
+                            </div>
+
+                            <!-- Información Técnica -->
+                            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                <div class="bg-slate-700 rounded px-3 py-2">
+                                    <span class="text-gray-400">Escala:</span>
+                                    <span id="canvas-scale" class="ml-2 font-mono text-white">-</span>
+                                </div>
+                                <div class="bg-slate-700 rounded px-3 py-2">
+                                    <span class="text-gray-400">Área:</span>
+                                    <span id="canvas-area" class="ml-2 font-mono text-white">-</span>
+                                </div>
+                                <div class="bg-slate-700 rounded px-3 py-2">
+                                    <span class="text-gray-400">Paso:</span>
+                                    <span id="canvas-step" class="ml-2 font-mono text-white">-</span>
+                                </div>
+                                <div class="bg-slate-700 rounded px-3 py-2">
+                                    <span class="text-gray-400">Circuitos:</span>
+                                    <span id="canvas-circuits" class="ml-2 font-mono text-white">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel de Presupuesto -->
+                        <div id="budget-container"
+                            class="hidden bg-slate-800 rounded-lg shadow-xl border border-slate-700 p-6 fade-in">
+                            <h3
+                                class="text-xl font-bold mb-6 flex items-center text-white border-b border-slate-700 pb-4">
+                                <i class="fas fa-calculator text-green-400 mr-3"></i>
+                                Presupuesto Estimado de Materiales
+                            </h3>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-900 text-gray-400 uppercase text-xs tracking-wider">
+                                            <th class="p-4 border-b border-slate-700">Producto</th>
+                                            <th class="p-4 border-b border-slate-700 text-center">Cant.</th>
+                                            <th class="p-4 border-b border-slate-700 text-center">Unid.</th>
+                                            <th class="p-4 border-b border-slate-700 text-right">Unitario</th>
+                                            <th class="p-4 border-b border-slate-700 text-right">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="budget-table-body">
+                                        <!-- Se generará dinámicamente -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="bg-slate-900/50">
+                                            <td colspan="4" class="p-4 text-right font-bold text-white text-base">TOTAL
+                                                GENERAL (USD)</td>
+                                            <td id="budget-total"
+                                                class="p-4 text-right font-bold text-green-400 text-xl font-mono">$ 0.00
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <div class="mt-6 flex justify-end space-x-4">
+                                <button id="download-pdf-btn"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center shadow-lg">
+                                    <i class="fas fa-file-pdf mr-2 text-xl"></i>
+                                    Descargar Presupuesto PDF
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-slate-800 border-t border-slate-700 mt-12">
+            <div class="container mx-auto px-6 py-6">
+                <div class="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
+                    <p>&copy; 2025 API Piso Radiante | Herramienta Profesional de Ingeniería</p>
+                    <p class="mt-2 md:mt-0">Desarrollado por Edgardo Lamas</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Modal de Calibración -->
+    <div id="calibration-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div id="modal-content"
+            class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-6 w-full max-w-sm transform transition-all scale-95 opacity-0 duration-300">
+            <div class="flex items-center mb-4 text-blue-400">
+                <i class="fas fa-ruler-horizontal text-xl mr-3"></i>
+                <h3 class="text-lg font-bold text-white">Escala del Plano</h3>
+            </div>
+            <p class="text-sm text-gray-400 mb-6">
+                Ingresá los metros reales que mide la línea que acabás de trazar en el plano.
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Metros Reales</label>
+                    <div class="relative">
+                        <input type="number" id="modal-dist-input" step="0.01" placeholder="Ej: 0.80"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg py-3 px-4 text-white font-mono focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        <span class="absolute right-4 top-3 text-gray-500">m</span>
+                    </div>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button id="modal-cancel-btn"
+                        class="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold transition">
+                        Cancelar
+                    </button>
+                    <button id="modal-apply-btn"
+                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-semibold text-white transition">
+                        Calibrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/js/canvasRenderer.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        // Mostrar ancho actual en mobile gate
+        function updateWidth() {
+            const widthEl = document.getElementById('current-width');
+            if (widthEl) {
+                widthEl.textContent = window.innerWidth;
+            }
+        }
+        updateWidth();
+        window.addEventListener('resize', updateWidth);
+    </script>
+
+</body>
+
+</html>

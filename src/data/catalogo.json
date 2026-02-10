@@ -1,0 +1,144 @@
+{
+    "productos": [
+        {
+            "id": "TUB-PEX-20",
+            "nombre": "Tubo PE-X 20mm (s/ barrera)",
+            "descripcion": "Tubería de polietileno reticulado sin barrera de oxígeno",
+            "precioUnitario": 1.60,
+            "unidad": "m",
+            "categoria": "TUBERIA"
+        },
+        {
+            "id": "TUB-ALIM-1P",
+            "nombre": "Tubería de Alimentación 1\"",
+            "descripcion": "Tubería de polipropileno o PEX de 1 pulgada para tramo principal",
+            "precioUnitario": 4.80,
+            "unidad": "m",
+            "categoria": "TUBERIA"
+        },
+        {
+            "id": "AIS-ALIM-1P",
+            "nombre": "Aislamiento Térmico 1\"",
+            "descripcion": "Funda aislante para tubería de 1 pulgada (tipo Armaflex o similar)",
+            "precioUnitario": 2.50,
+            "unidad": "m",
+            "categoria": "AISLACION"
+        },
+        {
+            "id": "PLA-AIS-EPS",
+            "nombre": "Placa Aislante EPS",
+            "descripcion": "Placa de poliestireno expandido de alta densidad para piso radiante",
+            "precioUnitario": 10.00,
+            "unidad": "m2",
+            "categoria": "AISLACION"
+        },
+        {
+            "id": "BAN-PER-PE",
+            "nombre": "Banda Perimetral",
+            "descripcion": "Banda perimetral de 8mm para dilatación",
+            "precioUnitario": 2.00,
+            "unidad": "m",
+            "categoria": "AISLACION"
+        },
+        {
+            "id": "VAL-ESF-PAR",
+            "nombre": "Juego Válvulas Esféricas (Par)",
+            "descripcion": "Válvulas de corte para colector entrada/salida",
+            "precioUnitario": 30.00,
+            "unidad": "un",
+            "categoria": "ACCESORIOS"
+        },
+        {
+            "id": "GAB-MET-COL",
+            "nombre": "Gabinete Metálico",
+            "descripcion": "Gabinete para alojamiento de colector",
+            "precioUnitario": 55.00,
+            "unidad": "un",
+            "categoria": "ACCESORIOS"
+        },
+        {
+            "id": "MAL-ELE-42",
+            "nombre": "Malla Electrosoldada 4.2mm",
+            "descripcion": "Malla 15x15 para sujeción de tubería",
+            "precioUnitario": 4.50,
+            "unidad": "m2",
+            "categoria": "ESTRUCTURA"
+        },
+        {
+            "id": "PRE-SUJ-BOL",
+            "nombre": "Precintos de Sujeción (bolsa)",
+            "descripcion": "Bolsa de precintos para fijación a malla",
+            "precioUnitario": 5.00,
+            "unidad": "un",
+            "categoria": "ACCESORIOS"
+        }
+    ],
+    "colectores": [
+        {
+            "vias": 2,
+            "id": "COL-2V",
+            "nombre": "Colector Completo 2 Vías",
+            "precioUnitario": 120.00
+        },
+        {
+            "vias": 3,
+            "id": "COL-3V",
+            "nombre": "Colector Completo 3 Vías",
+            "precioUnitario": 150.00
+        },
+        {
+            "vias": 4,
+            "id": "COL-4V",
+            "nombre": "Colector Completo 4 Vías",
+            "precioUnitario": 180.00
+        },
+        {
+            "vias": 5,
+            "id": "COL-5V",
+            "nombre": "Colector Completo 5 Vías",
+            "precioUnitario": 210.00
+        },
+        {
+            "vias": 6,
+            "id": "COL-6V",
+            "nombre": "Colector Completo 6 Vías",
+            "precioUnitario": 240.00
+        },
+        {
+            "vias": 7,
+            "id": "COL-7V",
+            "nombre": "Colector Completo 7 Vías",
+            "precioUnitario": 270.00
+        },
+        {
+            "vias": 8,
+            "id": "COL-8V",
+            "nombre": "Colector Completo 8 Vías",
+            "precioUnitario": 300.00
+        },
+        {
+            "vias": 9,
+            "id": "COL-9V",
+            "nombre": "Colector Completo 9 Vías",
+            "precioUnitario": 330.00
+        },
+        {
+            "vias": 10,
+            "id": "COL-10V",
+            "nombre": "Colector Completo 10 Vías",
+            "precioUnitario": 360.00
+        },
+        {
+            "vias": 11,
+            "id": "COL-11V",
+            "nombre": "Colector Completo 11 Vías",
+            "precioUnitario": 390.00
+        },
+        {
+            "vias": 12,
+            "id": "COL-12V",
+            "nombre": "Colector Completo 12 Vías",
+            "precioUnitario": 420.00
+        }
+    ]
+}
