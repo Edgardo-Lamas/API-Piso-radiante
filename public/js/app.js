@@ -908,7 +908,6 @@ function updateRoomsList() {
         </div>
     `).join('');
 }
-}
 
 function calculateWaypointDistanceToRoom(room) {
     if (designState.waypoints.length === 0) return 0;
