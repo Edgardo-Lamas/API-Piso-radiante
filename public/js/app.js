@@ -70,6 +70,7 @@ function initializeEventListeners() {
 
     // Listeners Diseño Avanzado
     if (planUpload) {
+        console.log('planUpload element found, adding change listener');
         planUpload.addEventListener('change', handlePlanUpload);
     } else {
         console.error('Error: planUpload element not found');
@@ -639,8 +640,15 @@ window.addEventListener('resize', () => {
 // ========================================
 
 function handlePlanUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    console.log('handlePlanUpload called', e);
+    const file = e.target.files?.[0];
+    
+    if (!file) {
+        console.log('No file selected');
+        return;
+    }
+
+    console.log('File selected:', file.name, file.type);
 
     // Validar que sea una imagen
     if (!file.type.startsWith('image/')) {
@@ -651,24 +659,30 @@ function handlePlanUpload(e) {
 
     // Mostrar nombre del archivo en el label
     const label = document.querySelector('label[for="plan-upload"]');
-    label.innerHTML = `<i class="fas fa-check-circle text-green-400 mr-2"></i>${file.name}`;
+    if (label) {
+        label.innerHTML = `<i class="fas fa-check-circle text-green-400 mr-2"></i>${file.name}`;
+    }
 
     const reader = new FileReader();
     reader.onload = (event) => {
+        console.log('FileReader onload');
         const img = new Image();
         img.onload = () => {
+            console.log('Image loaded successfully');
             designState.backgroundImage = img;
             removePlanBtn.classList.remove('hidden');
             startCalibBtn.classList.remove('hidden');
             showError('✓ Plano cargado: ' + file.name + '. Se recomienda calibrar la escala para mayor precisión.');
         };
         img.onerror = () => {
+            console.error('Image load error');
             showError('Error: No se pudo cargar la imagen. Asegúrese de seleccionar un archivo de imagen válido.');
             planUpload.value = '';
         };
         img.src = event.target.result;
     };
     reader.onerror = () => {
+        console.error('FileReader error');
         showError('Error: No se pudo leer el archivo.');
         planUpload.value = '';
     };
