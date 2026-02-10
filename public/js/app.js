@@ -76,8 +76,11 @@ cancelCalibBtn.addEventListener('click', handleCancelCalibration);
 startRoomBtn.addEventListener('click', handleStartRoomDrawing);
 clearRoomsBtn.addEventListener('click', () => {
     designState.rooms = [];
+    document.getElementById('area').value = '';
+    document.getElementById('area').disabled = false;
+    document.getElementById('area').style.opacity = '1';
     updateRoomsList();
-    showError("✓ Ambientes eliminados");
+    showError("✓ Ambientes eliminados. Campo de área habilitado nuevamente.");
 });
 
 // Listeners Modal
@@ -125,10 +128,19 @@ async function handleFormSubmit(e) {
     hideError();
     hideResults();
 
+    // Validar que haya área o ambientes definidos
+    const hasRooms = designState.rooms.length > 0;
+    const areaValue = parseFloat(document.getElementById('area').value);
+    
+    if (!hasRooms && (!areaValue || isNaN(areaValue) || areaValue <= 0)) {
+        showError('Debes ingresar un área O definir ambientes en el plano');
+        return;
+    }
+
     // Obtener datos del formulario
     const formData = new FormData(form);
     const data = {
-        area: parseFloat(formData.get('area')),
+        area: hasRooms ? areaValue : parseFloat(formData.get('area')),
         cargaTermicaRequerida: parseFloat(formData.get('cargaTermicaRequerida')),
         tipoDeSuelo: formData.get('tipoDeSuelo'),
         // Usar distancia de waypoints si existe, sino la del formulario
@@ -815,13 +827,25 @@ function updateMultiRoomResults() {
 function updateRoomsList() {
     const roomsListContainer = document.getElementById('rooms-list');
     const roomsItemsContainer = document.getElementById('rooms-items');
+    const areaInput = document.getElementById('area');
+    const areaInfo = document.getElementById('area-info');
     
     if (designState.rooms.length === 0) {
         roomsListContainer.classList.add('hidden');
+        // Permitir edición manual si no hay ambientes
+        areaInput.disabled = false;
+        areaInput.style.opacity = '1';
+        areaInfo.classList.add('hidden');
         return;
     }
 
     roomsListContainer.classList.remove('hidden');
+    
+    // Desabilitar campo de área cuando hay ambientes definidos
+    areaInput.disabled = true;
+    areaInput.style.opacity = '0.6';
+    areaInfo.classList.remove('hidden');
+    
     roomsItemsContainer.innerHTML = designState.rooms.map((room, idx) => `
         <div class="flex items-center justify-between p-2 bg-slate-800 rounded text-xs">
             <div class="flex items-center space-x-2">
