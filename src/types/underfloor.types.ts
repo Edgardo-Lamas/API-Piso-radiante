@@ -30,7 +30,9 @@ export interface UnderfloorCalculationInput {
     /** Tipo de suelo de acabado */
     tipoDeSuelo: TipoDeSuelo;
 
-    /** Distancia lineal desde el colector a la puerta de la habitación en metros */
+    /** Distancia de IDA entre la caldera y la ubicación del colector en metros.
+     *  Se calcula como ida + vuelta (×2) para determinar la longitud total de acometida.
+     *  Afecta el diámetro del colector y su capacidad de caudal. */
     distanciaAlColector: number;
 
     /** Distancia entre Caldera y Colector para alimentación (opcional, diseño avanzado) */
@@ -83,7 +85,9 @@ export interface UnderfloorCalculationOutput {
     /** Longitud de serpentina en metros */
     longitudSerpentina: number;
 
-    /** Longitud de acometida (ida y vuelta) en metros */
+    /** Longitud de acometida (ida y vuelta) en metros.
+     *  Se calcula como: distanciaAlColector × 2
+     *  Representa la tubería de alimentación desde caldera al colector y retorno. */
     longitudAcometida: number;
 
     /** Longitud total de tubería en metros */

@@ -88,7 +88,7 @@ Content-Type: application/json
 | `area` | number | Área total a calefaccionar (m²) | 1 - 1000 |
 | `cargaTermicaRequerida` | number | Potencia de calefacción requerida (W/m²) | 10 - 150 |
 | `tipoDeSuelo` | string | Tipo de acabado del suelo | Ver tipos disponibles |
-| `distanciaAlColector` | number | Distancia lineal desde colector a puerta (m) | 0 - 50 |
+| `distanciaAlColector` | number | Distancia de IDA entre caldera y colector (m). Se multiplica ×2 para acometida ida+vuelta | 0 - 50 |
 
 **Tipos de Suelo Disponibles:**
 - `PETREO`: Cerámica, porcelanato, piedra (Potencia máx: 100 W/m²)

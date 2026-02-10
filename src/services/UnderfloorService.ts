@@ -133,7 +133,13 @@ export class UnderfloorService {
 
     /**
      * Calcula la longitud de acometida (ida y vuelta)
-     * Fórmula: L_acometida = distanciaAlColector × 2
+     * Desde la caldera al colector y retorno.
+     * Fórmula: L_acometida = distanciaAlColector × 2 (ida + vuelta)
+     * 
+     * Esta distancia es crítica para:
+     * - Determinar el diámetro del colector
+     * - Calcular la capacidad de caudal requerida
+     * - Evaluar la pérdida de carga en alimentación
      */
     private calculateAcometidaLength(distanciaAlColector: number): number {
         return distanciaAlColector * 2;
