@@ -58,64 +58,102 @@ let currentCalculation = null;
 // Event Listeners
 // ========================================
 
-form.addEventListener('submit', handleFormSubmit);
-genBudgetBtn.addEventListener('click', handleGenerateBudget);
-downloadPdfBtn.addEventListener('click', handleDownloadPDF);
+// Función para inicializar listeners de forma segura
+function initializeEventListeners() {
+    // Verificar que los elementos existan antes de agregar listeners
+    if (form) form.addEventListener('submit', handleFormSubmit);
+    if (genBudgetBtn) genBudgetBtn.addEventListener('click', handleGenerateBudget);
+    if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', handleDownloadPDF);
 
-const startRoomBtn = document.getElementById('start-room-btn');
-const clearRoomsBtn = document.getElementById('clear-rooms-btn');
+    const startRoomBtn = document.getElementById('start-room-btn');
+    const clearRoomsBtn = document.getElementById('clear-rooms-btn');
 
-// Listeners Diseño Avanzado
-planUpload.addEventListener('change', handlePlanUpload);
-removePlanBtn.addEventListener('click', handleRemovePlan);
-startCalibBtn.addEventListener('click', handleStartCalibration);
-applyCalibBtn.addEventListener('click', handleApplyCalibration);
-cancelCalibBtn.addEventListener('click', handleCancelCalibration);
-
-// Listeners Múltiples Ambientes
-startRoomBtn.addEventListener('click', handleStartRoomDrawing);
-clearRoomsBtn.addEventListener('click', () => {
-    designState.rooms = [];
-    document.getElementById('area').value = '';
-    document.getElementById('area').disabled = false;
-    document.getElementById('area').style.opacity = '1';
-    updateRoomsList();
-    showError("✓ Ambientes eliminados. Campo de área habilitado nuevamente.");
-});
-
-// Listeners Modal
-modalApplyBtn.addEventListener('click', () => {
-    const meters = parseFloat(modalDistInput.value);
-    if (!isNaN(meters) && meters > 0) {
-        realDistInput.value = meters;
-        handleApplyCalibration();
-        closeCalibModal();
+    // Listeners Diseño Avanzado
+    if (planUpload) {
+        planUpload.addEventListener('change', handlePlanUpload);
     } else {
-        showError("Por favor ingrese una medida válida mayor a 0.");
+        console.error('Error: planUpload element not found');
     }
-});
+    
+    if (removePlanBtn) removePlanBtn.addEventListener('click', handleRemovePlan);
+    if (startCalibBtn) startCalibBtn.addEventListener('click', handleStartCalibration);
+    if (applyCalibBtn) applyCalibBtn.addEventListener('click', handleApplyCalibration);
+    if (cancelCalibBtn) cancelCalibBtn.addEventListener('click', handleCancelCalibration);
 
-modalCancelBtn.addEventListener('click', () => {
-    handleCancelCalibration();
-    closeCalibModal();
-});
-
-// Listeners Waypoints
-startRouteBtn.addEventListener('click', handleStartRouting);
-const canvas = document.getElementById('pipe-layout-canvas');
-canvas.addEventListener('dblclick', handleFinishRouting);
-window.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && designState.isRouting) {
-        handleFinishRouting();
+    // Listeners Múltiples Ambientes
+    if (startRoomBtn) {
+        startRoomBtn.addEventListener('click', handleStartRoomDrawing);
     }
-});
+    
+    if (clearRoomsBtn) {
+        clearRoomsBtn.addEventListener('click', () => {
+            designState.rooms = [];
+            document.getElementById('area').value = '';
+            document.getElementById('area').disabled = false;
+            document.getElementById('area').style.opacity = '1';
+            updateRoomsList();
+            showError("✓ Ambientes eliminados. Campo de área habilitado nuevamente.");
+        });
+    }
 
-// Canvas Controls
-document.getElementById('clear-all-btn').addEventListener('click', handleClearAll);
-document.getElementById('delete-waypoints-btn').addEventListener('click', () => {
-    designState.waypoints = [];
-    document.getElementById('waypoint-count').textContent = '0';
-});
+    // Listeners Modal
+    if (modalApplyBtn) {
+        modalApplyBtn.addEventListener('click', () => {
+            const meters = parseFloat(modalDistInput.value);
+            if (!isNaN(meters) && meters > 0) {
+                realDistInput.value = meters;
+                handleApplyCalibration();
+                closeCalibModal();
+            } else {
+                showError("Por favor ingrese una medida válida mayor a 0.");
+            }
+        });
+    }
+
+    if (modalCancelBtn) {
+        modalCancelBtn.addEventListener('click', () => {
+            handleCancelCalibration();
+            closeCalibModal();
+        });
+    }
+
+    // Listeners Waypoints
+    if (startRouteBtn) {
+        startRouteBtn.addEventListener('click', handleStartRouting);
+    }
+    
+    const canvas = document.getElementById('pipe-layout-canvas');
+    if (canvas) {
+        canvas.addEventListener('dblclick', handleFinishRouting);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && designState.isRouting) {
+                handleFinishRouting();
+            }
+        });
+    }
+
+    // Canvas Controls
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    const deleteWaypointsBtn = document.getElementById('delete-waypoints-btn');
+    
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', handleClearAll);
+    }
+    
+    if (deleteWaypointsBtn) {
+        deleteWaypointsBtn.addEventListener('click', () => {
+            designState.waypoints = [];
+            document.getElementById('waypoint-count').textContent = '0';
+        });
+    }
+}
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeEventListeners);
+} else {
+    initializeEventListeners();
+}
 
 // ========================================
 // Manejo del Formulario
