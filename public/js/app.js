@@ -591,6 +591,17 @@ function handlePlanUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Validar que sea una imagen
+    if (!file.type.startsWith('image/')) {
+        showError('Por favor seleccione un archivo de imagen válido (PNG, JPG, etc.)');
+        planUpload.value = '';
+        return;
+    }
+
+    // Mostrar nombre del archivo en el label
+    const label = document.querySelector('label[for="plan-upload"]');
+    label.innerHTML = `<i class="fas fa-check-circle text-green-400 mr-2"></i>${file.name}`;
+
     const reader = new FileReader();
     reader.onload = (event) => {
         const img = new Image();
@@ -598,9 +609,17 @@ function handlePlanUpload(e) {
             designState.backgroundImage = img;
             removePlanBtn.classList.remove('hidden');
             startCalibBtn.classList.remove('hidden');
-            showError('Plano cargado. Se recomienda calibrar la escala para mayor precisión.');
+            showError('✓ Plano cargado: ' + file.name + '. Se recomienda calibrar la escala para mayor precisión.');
+        };
+        img.onerror = () => {
+            showError('Error: No se pudo cargar la imagen. Asegúrese de seleccionar un archivo de imagen válido.');
+            planUpload.value = '';
         };
         img.src = event.target.result;
+    };
+    reader.onerror = () => {
+        showError('Error: No se pudo leer el archivo.');
+        planUpload.value = '';
     };
     reader.readAsDataURL(file);
 }
@@ -612,6 +631,12 @@ function handleRemovePlan() {
     startCalibBtn.classList.add('hidden');
     calibrationTools.classList.add('hidden');
     planUpload.value = '';
+    
+    // Restaurar label original
+    const label = document.querySelector('label[for="plan-upload"]');
+    label.innerHTML = '<i class="fas fa-upload mr-2"></i>Seleccionar Archivo';
+    
+    showError('✓ Plano removido');
 }
 
 function handleStartCalibration() {
