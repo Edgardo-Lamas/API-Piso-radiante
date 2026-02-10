@@ -22,7 +22,12 @@ const designState = {
     activeRoomName: null,
     isDragging: false,
     draggedObject: null,
-    dragOffset: { x: 0, y: 0 }
+    dragOffset: { x: 0, y: 0 },
+    technicalData: {
+        area: 0,
+        paso: 0,
+        numCircuits: 0
+    }
 };
 
 const CIRCUIT_COLORS = [
@@ -436,13 +441,18 @@ function drawCalibrationGuide(ctx) {
  * Función que reemplaza a la anterior para integrarse con app.js
  */
 function renderPipeLayout(data) {
-    designState.room.area = data.area;
-    designState.room.paso = data.pasoSeleccionado;
-    designState.room.numCircuits = data.numeroCircuitos;
+    designState.technicalData.area = data.area;
+    designState.technicalData.paso = data.pasoSeleccionado;
+    designState.technicalData.numCircuits = data.numeroCircuitos;
 
-    // La animación drawAll se encarga del resto
+    // Mostrar el canvas container
     const container = document.getElementById('canvas-container');
-    if (container) container.classList.remove('hidden');
+    if (container) {
+        container.classList.remove('hidden');
+    }
+    
+    // Iniciar el motor de renderizado si no está iniciado
+    initCanvasEngine();
 }
 
 // Inicializar al cargar
