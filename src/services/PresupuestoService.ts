@@ -3,12 +3,15 @@ import { ResumenPresupuesto, Catalogo, ItemPresupuesto } from '../types/presupue
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Leer el catálogo una sola vez al cargar el módulo (singleton)
+const catalogoPath = path.join(__dirname, '../data/catalogo.json');
+const CATALOGO: Catalogo = JSON.parse(fs.readFileSync(catalogoPath, 'utf-8'));
+
 export class PresupuestoService {
     private catalogo: Catalogo;
 
     constructor() {
-        const catalogoPath = path.join(__dirname, '../data/catalogo.json');
-        this.catalogo = JSON.parse(fs.readFileSync(catalogoPath, 'utf-8'));
+        this.catalogo = CATALOGO;
     }
 
     public calcularPresupuesto(

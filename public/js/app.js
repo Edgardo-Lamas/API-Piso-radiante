@@ -7,7 +7,7 @@
 // Configuración
 // ========================================
 
-const API_URL = 'http://localhost:3000/api/v1/underfloor/calculate';
+const API_URL = '/api/v1/underfloor/calculate';
 
 // ========================================
 // Referencias al DOM
@@ -160,6 +160,24 @@ if (document.readyState === 'loading') {
 // Manejo del Formulario
 // ========================================
 
+function validateFormData(data) {
+    const errors = [];
+    if (!data.area || isNaN(data.area) || data.area < 1 || data.area > 1000) {
+        errors.push('Área debe estar entre 1 y 1000 m²');
+    }
+    if (!data.cargaTermicaRequerida || isNaN(data.cargaTermicaRequerida) ||
+        data.cargaTermicaRequerida < 10 || data.cargaTermicaRequerida > 150) {
+        errors.push('Carga térmica debe estar entre 10 y 150 W/m²');
+    }
+    if (!data.tipoDeSuelo) {
+        errors.push('Debe seleccionar un tipo de suelo');
+    }
+    if (isNaN(data.distanciaAlColector) || data.distanciaAlColector < 0 || data.distanciaAlColector > 200) {
+        errors.push('Distancia al colector debe estar entre 0 y 200 m');
+    }
+    return errors;
+}
+
 async function handleFormSubmit(e) {
     e.preventDefault();
 
@@ -193,6 +211,12 @@ async function handleFormSubmit(e) {
     // Validación básica del lado del cliente
     if (!data.tipoDeSuelo) {
         showError('Por favor seleccione un tipo de suelo');
+        return;
+    }
+
+    const validationErrors = validateFormData(data);
+    if (validationErrors.length > 0) {
+        showError(validationErrors.join(' | '));
         return;
     }
 
@@ -602,7 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function checkAPIStatus() {
     try {
-        const response = await fetch('http://localhost:3000/health');
+        const response = await fetch('/health');
         if (response.ok) {
             console.log('✅ API Status: Online');
         }
