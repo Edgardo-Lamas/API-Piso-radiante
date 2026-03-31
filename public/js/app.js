@@ -147,6 +147,9 @@ function initializeEventListeners() {
             document.getElementById('waypoint-count').textContent = '0';
         });
     }
+
+    const addCollectorBtn = document.getElementById('add-collector-btn');
+    if (addCollectorBtn) addCollectorBtn.addEventListener('click', handleAddCollector);
 }
 
 // Inicializar cuando el DOM esté listo
@@ -738,6 +741,8 @@ function handleStartCalibration() {
     document.getElementById('start-room-btn').classList.remove('hidden');
     document.getElementById('start-route-btn').classList.remove('hidden');
     document.getElementById('clear-rooms-btn').classList.remove('hidden');
+    const addCollectorBtn = document.getElementById('add-collector-btn');
+    if (addCollectorBtn) addCollectorBtn.classList.remove('hidden');
 }
 
 function handleApplyCalibration() {
@@ -799,6 +804,25 @@ function closeCalibModal() {
 // ========================================
 // Lógica de Múltiples Ambientes
 // ========================================
+
+function handleAddCollector() {
+    const existingCollectors = designState.objects.filter(o => o.type === 'collector');
+    const newIndex = existingCollectors.length + 1;
+    const canvas = document.getElementById('pipe-layout-canvas');
+    const cx = canvas ? canvas.width / 2 + (newIndex * 40) : 200;
+    const cy = canvas ? canvas.height / 2 : 200;
+
+    designState.objects.push({
+        id: `collector-${newIndex}`,
+        type: 'collector',
+        x: cx,
+        y: cy,
+        label: `COLECTOR ${newIndex}`,
+        icon: '🔀',
+        color: '#3b82f6'
+    });
+    showError(`✓ Colector ${newIndex} agregado al canvas. Podés arrastrarlo a la posición deseada.`);
+}
 
 function handleStartRoomDrawing() {
     if (!designState.calibration.isCalibrated) {

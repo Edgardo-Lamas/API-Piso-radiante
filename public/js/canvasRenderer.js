@@ -230,28 +230,30 @@ function drawObject(ctx, obj) {
 
 function drawFeedingPipe(ctx) {
     const boiler = designState.objects.find(o => o.id === 'boiler');
-    const collector = designState.objects.find(o => o.id === 'collector');
+    const collectors = designState.objects.filter(o => o.type === 'collector');
 
-    if (!boiler || !collector) return;
+    if (!boiler || collectors.length === 0) return;
 
     ctx.save();
-    ctx.strokeStyle = '#94a3b8'; // Slate-400
-    ctx.lineWidth = 8; // Gruesa (1")
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 8;
     ctx.lineCap = 'round';
     ctx.shadowBlur = 5;
     ctx.shadowColor = 'black';
 
-    ctx.beginPath();
-    ctx.moveTo(boiler.x, boiler.y);
-    // Dibujamos en ángulo recto para estética profesional
-    ctx.lineTo(boiler.x, collector.y);
-    ctx.lineTo(collector.x, collector.y);
-    ctx.stroke();
+    collectors.forEach(collector => {
+        ctx.beginPath();
+        ctx.moveTo(boiler.x, boiler.y);
+        ctx.lineTo(boiler.x, collector.y);
+        ctx.lineTo(collector.x, collector.y);
+        ctx.stroke();
 
-    // Texto de referencia
-    ctx.fillStyle = 'white';
-    ctx.font = 'italic 10px Arial';
-    ctx.fillText('Alimentación 1"', (boiler.x + collector.x) / 2, collector.y - 10);
+        ctx.fillStyle = 'white';
+        ctx.shadowBlur = 0;
+        ctx.font = 'italic 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Alimentación 1"', (boiler.x + collector.x) / 2, collector.y - 10);
+    });
 
     ctx.restore();
 }
@@ -276,6 +278,41 @@ function drawRooms(ctx) {
             // Dibujar serpentina dentro de este rectángulo
             const paso = designState.technicalData.paso || 15;
             drawSerpentineInside(ctx, r.x, r.y, r.w, r.h, paso, room.color);
+
+            // --- Etiqueta técnica del ambiente ---
+            const density = paso === 15 ? 6.7 : 5.0;
+            const mpp = designState.calibration.isCalibrated ? designState.calibration.metersPerPixel : (1 / 50);
+            const realW = Math.abs(r.w) * mpp;
+            const realH = Math.abs(r.h) * mpp;
+            const areaReal = realW * realH;
+            const serpLength = areaReal * density;
+            const circuitos = Math.ceil(serpLength / 120) || 1;
+
+            const normX = r.w >= 0 ? r.x : r.x + r.w;
+            const normY = r.h >= 0 ? r.y : r.y + r.h;
+            const normW = Math.abs(r.w);
+            const normH = Math.abs(r.h);
+
+            const labelH = 28;
+            const labelY = normY + normH - labelH;
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
+            ctx.fillRect(normX + 2, labelY, normW - 4, labelH);
+
+            ctx.fillStyle = room.color;
+            ctx.font = 'bold 9px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(room.name, normX + 6, labelY + 4);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '8px Inter, sans-serif';
+            const infoText = areaReal > 0
+                ? `${areaReal.toFixed(1)} m²  ·  ${circuitos} circ.  ·  paso ${paso} cm`
+                : `paso ${paso} cm`;
+            ctx.fillText(infoText, normX + 6, labelY + 16);
+            ctx.restore();
         });
     });
 
