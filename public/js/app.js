@@ -319,7 +319,7 @@ function renderDataCards(data) {
             unit: data.numeroCircuitos === 1 ? 'circuito' : 'circuitos',
             icon: '🔀',
             iconClass: 'text-green-400',
-            subtitle: `Máximo 120m por circuito`
+            subtitle: `Máximo 90m por circuito (PE-X 20mm)`
         },
         {
             title: 'Paso de Tubería',
@@ -911,8 +911,8 @@ function updateMultiRoomResults() {
 
         totalLength += totalRoomLength;
 
-        if (totalRoomLength > 120) {
-            warnings.push(`El ambiente "${room.name}" requiere MULTIPLES circuitos (${formatNumber(totalRoomLength / 120, 1)} circuitos).`);
+        if (totalRoomLength > 90) {
+            warnings.push(`El ambiente "${room.name}" requiere MULTIPLES circuitos (${formatNumber(totalRoomLength / 90, 1)} circuitos).`);
         }
     });
 

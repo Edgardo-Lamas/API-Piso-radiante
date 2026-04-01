@@ -126,7 +126,7 @@ function handleMouseDown(e) {
 
     // Si estamos en modo dibujo de Habitación
     if (designState.isDrawingRoom) {
-        designState.isDraggingRoom = true;
+        designState.isDrawingRoom = true;
         designState.currentRoomRect = { startX: mouseX, startY: mouseY, w: 0, h: 0 };
         return;
     }
@@ -155,7 +155,7 @@ function handleMouseDown(e) {
 }
 
 function handleMouseMove(e) {
-    if (designState.isDraggingRoom) {
+    if (designState.isDrawingRoom) {
         const rect = designState.currentRoomRect;
         rect.w = mouseX - rect.startX;
         rect.h = mouseY - rect.startY;
@@ -184,8 +184,8 @@ window.addEventListener('mousemove', (e) => {
 });
 
 function handleMouseUp() {
-    if (designState.isDraggingRoom) {
-        designState.isDraggingRoom = false;
+    if (designState.isDrawingRoom) {
+        designState.isDrawingRoom = false;
         if (Math.abs(designState.currentRoomRect.w) > 10 && Math.abs(designState.currentRoomRect.h) > 10) {
             if (typeof onRoomRectFinished === 'function') {
                 onRoomRectFinished(designState.currentRoomRect);
@@ -286,7 +286,7 @@ function drawRooms(ctx) {
             const realH = Math.abs(r.h) * mpp;
             const areaReal = realW * realH;
             const serpLength = areaReal * density;
-            const circuitos = Math.ceil(serpLength / 120) || 1;
+            const circuitos = Math.ceil(serpLength / 90) || 1;
 
             const normX = r.w >= 0 ? r.x : r.x + r.w;
             const normY = r.h >= 0 ? r.y : r.y + r.h;
@@ -317,7 +317,7 @@ function drawRooms(ctx) {
     });
 
     // Dibujar rectángulo actual siendo arrastrado
-    if (designState.isDraggingRoom && designState.currentRoomRect) {
+    if (designState.isDrawingRoom && designState.currentRoomRect) {
         const r = designState.currentRoomRect;
         ctx.save();
         ctx.strokeStyle = '#3b82f6';

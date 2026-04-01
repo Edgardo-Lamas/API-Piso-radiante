@@ -46,7 +46,7 @@ const PIPE_STEP_20CM: PipeStepConfig = {
 /**
  * Longitud máxima por circuito en metros
  */
-const MAX_CIRCUIT_LENGTH = 120;
+const MAX_CIRCUIT_LENGTH = 90;
 
 /**
  * Nota de diseño profesional estándar
@@ -147,7 +147,7 @@ export class UnderfloorService {
 
     /**
      * Calcula el número de circuitos necesarios
-     * Fórmula: N_circuitos = ceil(L_total / 120)
+     * Fórmula: N_circuitos = ceil(L_total / 90)
      */
     private calculateNumberOfCircuits(longitudTotal: number): number {
         return Math.ceil(longitudTotal / MAX_CIRCUIT_LENGTH);
@@ -157,7 +157,7 @@ export class UnderfloorService {
      * Genera mensaje de asesoramiento profesional si es necesario
      * 
      * Alertas:
-     * 1. Pérdida de Carga: Si L_total > 120m → sugerir división en circuitos
+     * 1. Pérdida de Carga: Si L_total > 90m → sugerir división en circuitos
      * 2. Suelo Crítico: Si suelo es Madera Flotante o Moqueta y carga > 60 W/m²
      */
     private generateAdvisoryMessage(
