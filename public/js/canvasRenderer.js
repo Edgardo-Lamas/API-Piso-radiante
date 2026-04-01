@@ -83,6 +83,8 @@ function drawAll() {
     // 4. Ambientes y Serpentinas
     drawRooms(ctx);
 
+    drawCircuitConnections(ctx);
+
     // 5. Waypoints (Ruta de Pasillo)
     drawWaypoints(ctx);
 
@@ -93,6 +95,8 @@ function drawAll() {
     if (designState.calibration.active || designState.calibration.points.length > 0) {
         drawCalibrationGuide(ctx);
     }
+
+    drawLegend(ctx);
 
     requestAnimationFrame(drawAll);
 }
@@ -226,28 +230,30 @@ function drawObject(ctx, obj) {
 
 function drawFeedingPipe(ctx) {
     const boiler = designState.objects.find(o => o.id === 'boiler');
-    const collector = designState.objects.find(o => o.id === 'collector');
+    const collectors = designState.objects.filter(o => o.type === 'collector');
 
-    if (!boiler || !collector) return;
+    if (!boiler || collectors.length === 0) return;
 
     ctx.save();
-    ctx.strokeStyle = '#94a3b8'; // Slate-400
-    ctx.lineWidth = 8; // Gruesa (1")
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 8;
     ctx.lineCap = 'round';
     ctx.shadowBlur = 5;
     ctx.shadowColor = 'black';
 
-    ctx.beginPath();
-    ctx.moveTo(boiler.x, boiler.y);
-    // Dibujamos en ángulo recto para estética profesional
-    ctx.lineTo(boiler.x, collector.y);
-    ctx.lineTo(collector.x, collector.y);
-    ctx.stroke();
+    collectors.forEach(collector => {
+        ctx.beginPath();
+        ctx.moveTo(boiler.x, boiler.y);
+        ctx.lineTo(boiler.x, collector.y);
+        ctx.lineTo(collector.x, collector.y);
+        ctx.stroke();
 
-    // Texto de referencia
-    ctx.fillStyle = 'white';
-    ctx.font = 'italic 10px Arial';
-    ctx.fillText('Alimentación 1"', (boiler.x + collector.x) / 2, collector.y - 10);
+        ctx.fillStyle = 'white';
+        ctx.shadowBlur = 0;
+        ctx.font = 'italic 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Alimentación 1"', (boiler.x + collector.x) / 2, collector.y - 10);
+    });
 
     ctx.restore();
 }
@@ -270,9 +276,43 @@ function drawRooms(ctx) {
             ctx.restore();
 
             // Dibujar serpentina dentro de este rectángulo
-            // Calculamos el paso basado en el estado (o default)
-            const paso = 15; // Debería venir de room settings
-            drawCounterflowSpiralInside(ctx, r.x, r.y, r.w, r.h, paso, room.color);
+            const paso = designState.technicalData.paso || 15;
+            drawSerpentineInside(ctx, r.x, r.y, r.w, r.h, paso, room.color);
+
+            // --- Etiqueta técnica del ambiente ---
+            const density = paso === 15 ? 6.7 : 5.0;
+            const mpp = designState.calibration.isCalibrated ? designState.calibration.metersPerPixel : (1 / 50);
+            const realW = Math.abs(r.w) * mpp;
+            const realH = Math.abs(r.h) * mpp;
+            const areaReal = realW * realH;
+            const serpLength = areaReal * density;
+            const circuitos = Math.ceil(serpLength / 120) || 1;
+
+            const normX = r.w >= 0 ? r.x : r.x + r.w;
+            const normY = r.h >= 0 ? r.y : r.y + r.h;
+            const normW = Math.abs(r.w);
+            const normH = Math.abs(r.h);
+
+            const labelH = 28;
+            const labelY = normY + normH - labelH;
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
+            ctx.fillRect(normX + 2, labelY, normW - 4, labelH);
+
+            ctx.fillStyle = room.color;
+            ctx.font = 'bold 9px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(room.name, normX + 6, labelY + 4);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '8px Inter, sans-serif';
+            const infoText = areaReal > 0
+                ? `${areaReal.toFixed(1)} m²  ·  ${circuitos} circ.  ·  paso ${paso} cm`
+                : `paso ${paso} cm`;
+            ctx.fillText(infoText, normX + 6, labelY + 16);
+            ctx.restore();
         });
     });
 
@@ -287,29 +327,71 @@ function drawRooms(ctx) {
     }
 }
 
-function drawCounterflowSpiralInside(ctx, x, y, w, h, pasoCm, color) {
-    const scale = designState.calibration.isCalibrated ? (1 / designState.calibration.metersPerPixel) : 50;
+function drawSerpentineInside(ctx, x, y, w, h, pasoCm, color) {
+    const scale = designState.calibration.isCalibrated
+        ? (1 / designState.calibration.metersPerPixel)
+        : 50;
     const step = (pasoCm / 100) * scale;
-    const cornerRadius = step * 0.4;
+    const halfStep = step / 2;
 
-    // Normalizar rect (permitir dibujo en cualquier dirección)
-    const normX = w > 0 ? x : x + w;
-    const normY = h > 0 ? y : y + h;
+    const normX = w >= 0 ? x : x + w;
+    const normY = h >= 0 ? y : y + h;
     const normW = Math.abs(w);
     const normH = Math.abs(h);
 
-    if (normW < step || normH < step) return;
+    if (normW < step * 2 || normH < step) return;
+
+    const margin = 8;
+    const x0 = normX + margin;
+    const y0 = normY + margin;
+    const x1 = normX + normW - margin;
+    const y1 = normY + normH - margin;
 
     ctx.save();
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.lineWidth = 2;
 
-    // IDA (Color del ambiente)
-    drawSpiralPath(ctx, normX + 5, normY + 5, normW - 10, normH - 10, step, cornerRadius, color, true);
+    // --- TUBERÍA IDA (color del ambiente) ---
+    ctx.strokeStyle = color;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    let goingRight = true;
+    let firstPoint = true;
+    for (let yLine = y0; yLine <= y1; yLine += step) {
+        const startX = goingRight ? x0 : x1;
+        const endX = goingRight ? x1 : x0;
+        if (firstPoint) {
+            ctx.moveTo(startX, yLine);
+            firstPoint = false;
+        } else {
+            ctx.lineTo(startX, yLine);
+        }
+        ctx.lineTo(endX, yLine);
+        goingRight = !goingRight;
+    }
+    ctx.stroke();
 
-    // RETORNO (Azul técnico o desaturado del mismo color)
-    drawSpiralPath(ctx, normX + 5 + step / 2, normY + 5 + step / 2, normW - 10 - step, normH - 10 - step, step, cornerRadius, '#3b82f6', false);
+    // --- TUBERÍA RETORNO (azul, desplazada medio paso) ---
+    ctx.strokeStyle = '#60a5fa';
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    goingRight = false; // opuesto a IDA
+    firstPoint = true;
+    for (let yLine = y0 + halfStep; yLine <= y1; yLine += step) {
+        const startX = goingRight ? x0 : x1;
+        const endX = goingRight ? x1 : x0;
+        if (firstPoint) {
+            ctx.moveTo(startX, yLine);
+            firstPoint = false;
+        } else {
+            ctx.lineTo(startX, yLine);
+        }
+        ctx.lineTo(endX, yLine);
+        goingRight = !goingRight;
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
 
     ctx.restore();
 }
@@ -430,6 +512,86 @@ function drawCalibrationGuide(ctx) {
         ctx.lineTo(p2.x, p2.y);
     }
     ctx.stroke();
+    ctx.restore();
+}
+
+function drawCircuitConnections(ctx) {
+    const collectors = designState.objects.filter(o => o.type === 'collector');
+    if (collectors.length === 0) return;
+
+    designState.rooms.forEach(room => {
+        const firstRect = room.rects[0];
+        if (!firstRect) return;
+
+        const roomCx = firstRect.x + firstRect.w / 2;
+        const roomCy = firstRect.y + firstRect.h / 2;
+
+        // Encontrar el colector más cercano al centro del ambiente
+        const collector = collectors.reduce((closest, col) => {
+            const d = Math.hypot(col.x - roomCx, col.y - roomCy);
+            const dPrev = closest ? Math.hypot(closest.x - roomCx, closest.y - roomCy) : Infinity;
+            return d < dPrev ? col : closest;
+        }, null);
+
+        if (!collector) return;
+
+        // Punto de entrada: borde del rect más cercano al colector
+        const entryX = firstRect.x + firstRect.w / 2;
+        const entryY = collector.y < roomCy ? firstRect.y : firstRect.y + firstRect.h;
+
+        const offset = 4;
+
+        ctx.save();
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // IDA - color del ambiente
+        ctx.strokeStyle = room.color;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(collector.x - offset, collector.y);
+        ctx.lineTo(entryX - offset, entryY);
+        ctx.stroke();
+
+        // RETORNO - azul punteado
+        ctx.strokeStyle = '#60a5fa';
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(collector.x + offset, collector.y);
+        ctx.lineTo(entryX + offset, entryY);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.restore();
+    });
+}
+
+function drawLegend(ctx) {
+    const canvas = document.getElementById('pipe-layout-canvas');
+    if (!canvas) return;
+    const items = [
+        { color: '#ef4444', label: 'IDA (tubería caliente)', dash: false },
+        { color: '#60a5fa', label: 'RETORNO (tubería fría)', dash: true },
+        { color: '#94a3b8', label: 'Alimentación caldera', dash: false }
+    ];
+    ctx.save();
+    ctx.font = 'bold 10px Inter, sans-serif';
+    let lx = 10, ly = 18;
+    items.forEach(item => {
+        ctx.strokeStyle = item.color;
+        ctx.lineWidth = 2;
+        if (item.dash) ctx.setLineDash([5, 4]);
+        else ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(lx, ly);
+        ctx.lineTo(lx + 22, ly);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText(item.label, lx + 28, ly + 4);
+        ly += 16;
+    });
     ctx.restore();
 }
 

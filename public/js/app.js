@@ -7,7 +7,7 @@
 // Configuración
 // ========================================
 
-const API_URL = 'http://localhost:3000/api/v1/underfloor/calculate';
+const API_URL = '/api/v1/underfloor/calculate';
 
 // ========================================
 // Referencias al DOM
@@ -147,6 +147,9 @@ function initializeEventListeners() {
             document.getElementById('waypoint-count').textContent = '0';
         });
     }
+
+    const addCollectorBtn = document.getElementById('add-collector-btn');
+    if (addCollectorBtn) addCollectorBtn.addEventListener('click', handleAddCollector);
 }
 
 // Inicializar cuando el DOM esté listo
@@ -159,6 +162,24 @@ if (document.readyState === 'loading') {
 // ========================================
 // Manejo del Formulario
 // ========================================
+
+function validateFormData(data) {
+    const errors = [];
+    if (!data.area || isNaN(data.area) || data.area < 1 || data.area > 1000) {
+        errors.push('Área debe estar entre 1 y 1000 m²');
+    }
+    if (!data.cargaTermicaRequerida || isNaN(data.cargaTermicaRequerida) ||
+        data.cargaTermicaRequerida < 10 || data.cargaTermicaRequerida > 150) {
+        errors.push('Carga térmica debe estar entre 10 y 150 W/m²');
+    }
+    if (!data.tipoDeSuelo) {
+        errors.push('Debe seleccionar un tipo de suelo');
+    }
+    if (isNaN(data.distanciaAlColector) || data.distanciaAlColector < 0 || data.distanciaAlColector > 200) {
+        errors.push('Distancia al colector debe estar entre 0 y 200 m');
+    }
+    return errors;
+}
 
 async function handleFormSubmit(e) {
     e.preventDefault();
@@ -193,6 +214,12 @@ async function handleFormSubmit(e) {
     // Validación básica del lado del cliente
     if (!data.tipoDeSuelo) {
         showError('Por favor seleccione un tipo de suelo');
+        return;
+    }
+
+    const validationErrors = validateFormData(data);
+    if (validationErrors.length > 0) {
+        showError(validationErrors.join(' | '));
         return;
     }
 
@@ -602,7 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function checkAPIStatus() {
     try {
-        const response = await fetch('http://localhost:3000/health');
+        const response = await fetch('/health');
         if (response.ok) {
             console.log('✅ API Status: Online');
         }
@@ -672,6 +699,10 @@ function handlePlanUpload(e) {
             designState.backgroundImage = img;
             removePlanBtn.classList.remove('hidden');
             startCalibBtn.classList.remove('hidden');
+            // Mostrar el canvas para que el usuario pueda ver el plano y calibrarlo
+            const container = document.getElementById('canvas-container');
+            if (container) container.classList.remove('hidden');
+            if (typeof initCanvasEngine === 'function') initCanvasEngine();
             showError('✓ Plano cargado: ' + file.name + '. Se recomienda calibrar la escala para mayor precisión.');
         };
         img.onerror = () => {
@@ -714,6 +745,8 @@ function handleStartCalibration() {
     document.getElementById('start-room-btn').classList.remove('hidden');
     document.getElementById('start-route-btn').classList.remove('hidden');
     document.getElementById('clear-rooms-btn').classList.remove('hidden');
+    const addCollectorBtn = document.getElementById('add-collector-btn');
+    if (addCollectorBtn) addCollectorBtn.classList.remove('hidden');
 }
 
 function handleApplyCalibration() {
@@ -775,6 +808,25 @@ function closeCalibModal() {
 // ========================================
 // Lógica de Múltiples Ambientes
 // ========================================
+
+function handleAddCollector() {
+    const existingCollectors = designState.objects.filter(o => o.type === 'collector');
+    const newIndex = existingCollectors.length + 1;
+    const canvas = document.getElementById('pipe-layout-canvas');
+    const cx = canvas ? canvas.width / 2 + (newIndex * 40) : 200;
+    const cy = canvas ? canvas.height / 2 : 200;
+
+    designState.objects.push({
+        id: `collector-${newIndex}`,
+        type: 'collector',
+        x: cx,
+        y: cy,
+        label: `COLECTOR ${newIndex}`,
+        icon: '🔀',
+        color: '#3b82f6'
+    });
+    showError(`✓ Colector ${newIndex} agregado al canvas. Podés arrastrarlo a la posición deseada.`);
+}
 
 function handleStartRoomDrawing() {
     if (!designState.calibration.isCalibrated) {
