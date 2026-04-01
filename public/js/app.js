@@ -306,12 +306,20 @@ function renderResults(data) {
 function renderDataCards(data) {
     const cards = [
         {
-            title: 'Longitud Total',
-            value: data.longitudTotal,
+            title: 'Tubería Alimentación 1"',
+            value: data.longitudAcometida > 0 ? data.longitudAcometida : '—',
+            unit: data.longitudAcometida > 0 ? 'm' : '',
+            icon: '🔧',
+            iconClass: 'text-slate-400',
+            subtitle: `Caldera → Colector/es (ida+vuelta) · Termofusión/PEX`
+        },
+        {
+            title: 'Tubería PE-X 20mm',
+            value: data.longitudSerpentina,
             unit: 'm',
             icon: '🔄',
             iconClass: 'text-blue-400',
-            subtitle: `Serpentina: ${data.longitudSerpentina}m | Acometida: ${data.longitudAcometida}m`
+            subtitle: `Serpentina en ambientes · Máx. 90m por circuito`
         },
         {
             title: 'Número de Circuitos',
@@ -319,7 +327,7 @@ function renderDataCards(data) {
             unit: data.numeroCircuitos === 1 ? 'circuito' : 'circuitos',
             icon: '🔀',
             iconClass: 'text-green-400',
-            subtitle: `Máximo 90m por circuito (PE-X 20mm)`
+            subtitle: `Longitud total: ${data.longitudTotal}m`
         },
         {
             title: 'Paso de Tubería',
@@ -902,17 +910,24 @@ function updateMultiRoomResults() {
     designState.rooms.forEach(room => {
         totalArea += room.area;
 
-        // Calcular serpentina (aprox 6.7m por m2 para paso 15)
-        const serpentina = room.area * 6.7;
+        const paso = designState.technicalData.paso || 15;
+        const density = paso === 15 ? 6.7 : 5.0;
+        const serpentina = room.area * density;
 
-        // Calcular conexión vía waypoints
-        const distAcometida = calculateWaypointDistanceToRoom(room);
+        // Distancia colector→borde del ambiente (ida+vuelta = acometida del circuito)
+        const distAcometida = calculateCollectorToRoomDistance(room);
         const totalRoomLength = serpentina + (distAcometida * 2);
+
+        // Guardar en el room para mostrar en la lista
+        room._serpentina = serpentina;
+        room._acometida = distAcometida;
+        room._totalCircuito = totalRoomLength;
+        room._circuitos = Math.ceil(totalRoomLength / 90) || 1;
 
         totalLength += totalRoomLength;
 
         if (totalRoomLength > 90) {
-            warnings.push(`El ambiente "${room.name}" requiere MULTIPLES circuitos (${formatNumber(totalRoomLength / 90, 1)} circuitos).`);
+            warnings.push(`El ambiente "${room.name}" requiere ${room._circuitos} circuitos (${formatNumber(totalRoomLength, 1)}m total).`);
         }
     });
 
@@ -923,9 +938,8 @@ function updateMultiRoomResults() {
         showError(warnings.join("<br>"));
     }
 
-    // Actualizar campos del formulario para el cálculo final
+    // Actualizar campo de área para el cálculo final
     document.getElementById('area').value = formatNumber(totalArea, 1);
-    document.getElementById('distancia').value = formatNumber(calculateWaypointDistance(), 1);
 }
 
 function updateRoomsList() {
@@ -950,15 +964,26 @@ function updateRoomsList() {
     areaInput.style.opacity = '0.6';
     areaInfo.classList.remove('hidden');
     
-    roomsItemsContainer.innerHTML = designState.rooms.map((room, idx) => `
-        <div class="flex items-center justify-between p-2 bg-slate-800 rounded text-xs">
-            <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 rounded" style="background-color: ${room.color}"></div>
-                <span class="text-gray-300">${room.name}</span>
+    roomsItemsContainer.innerHTML = designState.rooms.map((room, idx) => {
+        const hasMeasure = room._totalCircuito > 0;
+        const circInfo = hasMeasure
+            ? `<div class="mt-1 text-gray-500 space-y-0.5">
+                 <div>Serpentina: ${formatNumber(room._serpentina, 1)}m · Acometida: ${formatNumber(room._acometida * 2, 1)}m (ida+vuelta)</div>
+                 <div class="text-yellow-400 font-medium">Total circuito: ${formatNumber(room._totalCircuito, 1)}m → ${room._circuitos} circuito${room._circuitos > 1 ? 's' : ''}</div>
+               </div>`
+            : '';
+        return `
+        <div class="p-2 bg-slate-800 rounded text-xs">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded" style="background-color: ${room.color}"></div>
+                    <span class="text-gray-300 font-medium">${room.name}</span>
+                </div>
+                <span class="text-gray-500">${formatNumber(room.area, 1)} m²</span>
             </div>
-            <span class="text-gray-500">${formatNumber(room.area, 1)} m²</span>
-        </div>
-    `).join('');
+            ${circInfo}
+        </div>`;
+    }).join('');
 }
 
 function calculateWaypointDistanceToRoom(room) {
@@ -975,6 +1000,33 @@ function calculateWaypointDistanceToRoom(room) {
 
     const extraPixels = Math.sqrt((lastWP.x - roomCenterX) ** 2 + (lastWP.y - roomCenterY) ** 2);
     return baseDist + (extraPixels * designState.calibration.metersPerPixel);
+}
+
+/**
+ * Calcula la distancia en metros desde el colector más cercano
+ * hasta el borde más próximo del ambiente (no el centro).
+ * Usa la posición real del ícono del colector en el canvas calibrado.
+ */
+function calculateCollectorToRoomDistance(room) {
+    const collectors = designState.objects.filter(o => o.type === 'collector');
+    if (collectors.length === 0 || !designState.calibration.isCalibrated) return 0;
+
+    const firstRect = room.rects[0];
+    if (!firstRect) return 0;
+
+    const rx = firstRect.x, ry = firstRect.y;
+    const rw = firstRect.w, rh = firstRect.h;
+
+    let minDist = Infinity;
+    collectors.forEach(col => {
+        // Punto más cercano del colector al borde del rectángulo
+        const nearX = Math.max(rx, Math.min(col.x, rx + rw));
+        const nearY = Math.max(ry, Math.min(col.y, ry + rh));
+        const distPx = Math.sqrt((col.x - nearX) ** 2 + (col.y - nearY) ** 2);
+        if (distPx < minDist) minDist = distPx;
+    });
+
+    return minDist * designState.calibration.metersPerPixel;
 }
 
 function calculateFeedingDistance() {
